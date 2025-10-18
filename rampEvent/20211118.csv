@@ -1,0 +1,2 @@
+No.,startTime,endTime,duration,rampRate,startTimeDown,startTimeUp,endTimeDown,endTimeUp,durationDown,durationUp,rampRateDown,rampRateUp
+1.0,18:45:00,19:45:00,60.0,-1.2054333333333334,18:00:00,19:15:00,19:00:00,20:15:00,15.0,135.0,-1.0,-1.1060712765254

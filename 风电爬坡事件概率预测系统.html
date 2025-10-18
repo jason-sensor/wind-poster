@@ -1,0 +1,1937 @@
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8">
+  <title>风电场预测系统</title>
+  <!-- 引入 Bootstrap 简化布局 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- 引入 Font Awesome 图标 -->
+  <style>
+    /* 全局样式设置 */
+    body {
+      font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #2c3e50;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f7fa;
+    }
+
+    /* 其他样式保持不变 */
+    .top-nav {
+      background-color: #1a365d;
+      color: #fff;
+      padding: 15px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    
+    .system-title-container {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .system-title {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      padding-top: 10px;
+    }
+    
+    .nav-buttons button {
+      background-color: #2c5282;
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .nav-buttons button:hover {
+      background-color: #3182ce;
+    }
+    
+    .nav-buttons button.active {
+      background-color: #3182ce;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .nav-buttons button.clicked {
+      background-color: #1a365d;
+    }
+    
+    .nav-buttons button i {
+      font-size: 14px;
+    }
+
+    .dropdown-panel-container {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .dropdown-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: white;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 1000;
+      min-width: 220px;
+      display: none;
+    }
+    
+    .dropdown-panel.show {
+      display: block;
+    }
+    
+    .dropdown-item {
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background-color 0.2s ease;
+      color: #2d3748;
+    }
+    
+    .dropdown-item:hover {
+      background-color: #ebf8ff;
+      color: #2c5282;
+    }
+    
+    .dropdown-item.active {
+      background-color: #3182ce;
+      color: white;
+    }
+    
+    .current-selection {
+      font-weight: 500;
+      margin-left: 5px;
+    }
+
+    .left-panel {
+      background-color: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px;
+      min-height: calc(100vh - 160px);
+      box-shadow: 2px 0 5px rgba(0,0,0,0.03);
+    }
+    
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+    
+    .card {
+      margin-bottom: 20px;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+      border: none;
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .card-header {
+      background-color: #2c5282;
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 12px 15px;
+      border-bottom: none;
+    }
+    
+    .card-body {
+      padding: 15px;
+      font-size: 14px;
+    }
+    
+    .pie-chart-container {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      margin: 10px auto 20px;
+    }
+    
+    .pie-chart {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      background: conic-gradient(#38b2ac var(--power-percentage, 45%), #e2e8f0 0);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: background 1s ease-in-out;
+    }
+    
+    .pie-chart::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .chart-center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2;
+    }
+    
+    .current-power {
+      font-size: 16px;
+      font-weight: bold;
+      color: #2c5282;
+    }
+    
+    .total-capacity {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .capacity-ratio {
+      font-size: 14px;
+      font-weight: 600;
+      color: #38b2ac;
+      margin-top: 3px;
+    }
+    
+    .status-item {
+      margin-bottom: 12px;
+      padding-left: 18px;
+      position: relative;
+      color: #4a5568;
+      line-height: 1.6;
+    }
+    
+    .status-item::before {
+      content: '•';
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+    }
+    
+    .status-item.normal::before {
+      color: #38b2ac;
+    }
+    
+    .status-item.abnormal::before {
+      color: #fc8181;
+    }
+
+    .prediction-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .prediction-option {
+      padding: 10px 12px;
+      background-color: #edf2f7;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      color: #2d3748;
+      border-left: 3px solid transparent;
+    }
+    
+    .prediction-option:hover {
+      background-color: #e2e8f0;
+      border-left-color: #4299e1;
+    }
+    
+    .prediction-option.active {
+      background-color: #ebf8ff;
+      color: #2c5282;
+      font-weight: 500;
+      border-left-color: #3182ce;
+      box-shadow: 0 2px 4px rgba(49, 130, 206, 0.1);
+    }
+
+    .middle-panel {
+      background-color: #f7fafc;
+      min-height: calc(100vh - 160px);
+      padding: 20px;
+    }
+    
+    .middle-content {
+      background-color: white;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      height: 100%;
+      min-height: 700px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 15px;
+    }
+    
+    .chart-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+    
+    .chart-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .chart-control-btn {
+      background-color: #2c5282;
+      color: #ffffff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .chart-control-btn:hover {
+      background-color: #3182ce;
+    }
+    
+    .chart-control-btn.active {
+      background-color: #3182ce;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .chart-image-container {
+      width: 100%;
+      height: 400px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .chart-placeholder {
+      font-size: 16px;
+      color: #4a5568;
+      text-align: center;
+      padding: 20px;
+      width: 100%;
+      margin-top: 50px;
+    }
+    
+    .chart-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #2c5282;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      width: 100%;
+      text-align: center;
+      margin-top: 5px;
+    }
+    
+    .chart-image {
+      max-width: 100%;
+      max-height: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-top: 10px;
+    }
+    
+    .image-loading {
+      color: #6b7280;
+      text-align: center;
+      margin-top: 50px;
+    }
+    
+    .image-error {
+      color: #e53e3e;
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+    }
+
+    /* 爬坡事件表格样式 */
+    .ramp-table-container {
+      width: 100%;
+      margin-top: 20px;
+      overflow-x: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 6px;
+    }
+    
+    .ramp-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #ffffff;
+    }
+    
+    .ramp-table th {
+      background-color: #2c5282;
+      color: white;
+      font-weight: 600;
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 2px solid #1a365d;
+      position: sticky;
+      top: 0;
+    }
+    
+    .ramp-table td {
+      padding: 10px 15px;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+      transition: background-color 0.2s ease;
+    }
+    
+    .ramp-table tr:hover td {
+      background-color: #f7fafc;
+    }
+    
+    .ramp-table tr:nth-child(even) td {
+      background-color: #f7fafc;
+    }
+    
+    .table-caption {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c5282;
+      margin-bottom: 10px;
+      text-align: left;
+      padding-left: 5px;
+    }
+    
+    .table-loading {
+      text-align: center;
+      padding: 20px;
+      color: #6b7280;
+    }
+    
+    .table-error {
+      text-align: center;
+      padding: 20px;
+      color: #e53e3e;
+    }
+
+    /* 特征概率表格容器 */
+    .feature-table-container {
+      width: 100%;
+      margin-top: 20px;
+      overflow-x: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 6px;
+      display: none;
+    }
+    
+    .feature-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #ffffff;
+    }
+    
+    .feature-table th {
+      background-color: #2c5282;
+      color: white;
+      font-weight: 600;
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 2px solid #1a365d;
+    }
+    
+    .feature-table td {
+      padding: 10px 15px;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+      transition: background-color 0.2s ease;
+    }
+    
+    .feature-table tr:hover td {
+      background-color: #f7fafc;
+    }
+    
+    .feature-table tr:nth-child(even) td {
+      background-color: #f7fafc;
+    }
+
+    .right-panel {
+      padding: 20px;
+      background-color: #ffffff;
+      border-left: 1px solid #e2e8f0;
+      min-height: calc(100vh - 160px);
+      box-shadow: -2px 0 5px rgba(0,0,0,0.03);
+    }
+    
+    .analysis-content {
+      font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #2d3748;
+      letter-spacing: 0.3px;
+      min-height: 150px;
+    }
+    
+    .analysis-content p {
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+    }
+    
+    .analysis-content p:hover {
+      color: #1a365d;
+    }
+    
+    .task-log {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 300px;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+    }
+    
+    .task-log li {
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      background-color: #f7fafc;
+      font-size: 13px;
+      position: relative;
+      padding-left: 25px;
+      border-left: 2px solid #e2e8f0;
+      opacity: 0.7;
+      transition: all 0.3s ease;
+    }
+    
+    .task-log li.active {
+      opacity: 1;
+      background-color: #ebf8ff;
+      border-left-color: #3182ce;
+    }
+    
+    .task-log li::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #3182ce;
+    }
+    
+    .task-log li:nth-child(odd) {
+      background-color: #edf2f7;
+    }
+
+    .date-picker-container {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .date-picker {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: white;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 15px;
+      z-index: 1000;
+      width: 250px;
+      display: none;
+    }
+    
+    .date-picker.show {
+      display: block;
+    }
+    
+    .current-date {
+      font-weight: 500;
+      margin-left: 5px;
+    }
+
+    .file-upload-container {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px dashed #e2e8f0;
+      display: none;
+    }
+    
+    .file-upload-btn {
+      background-color: #3182ce;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .file-upload-btn:hover {
+      background-color: #2b6cb0;
+    }
+    
+    #fileInput {
+      display: none;
+    }
+    
+    .file-info {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6b7280;
+      word-break: break-all;
+    }
+
+    @media (max-width: 1200px) {
+      .nav-buttons button {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+      
+      .chart-image-container {
+        height: 350px;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .system-title {
+        font-size: 24px;
+      }
+      
+      .left-panel, .right-panel, .middle-panel {
+        min-height: auto;
+      }
+      
+      .chart-image-container {
+        height: 300px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .system-title {
+        font-size: 22px;
+      }
+      
+      .system-title-container {
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+      }
+      
+      .left-panel, .right-panel {
+        border: none;
+        margin-bottom: 20px;
+      }
+      
+      .date-picker {
+        width: 200px;
+      }
+      
+      .chart-image-container {
+        height: 250px;
+      }
+      
+      .ramp-table td, .ramp-table th,
+      .feature-table td, .feature-table th {
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+      
+      .chart-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .chart-control-btn {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+    }
+  </style>
+  <!-- 引入 Font Awesome 图标 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <div class="top-nav">
+    <div class="system-title-container">
+      <h1 class="system-title">风电爬坡事件概率预测系统 v1.1</h1>
+    </div>
+    
+    <div class="nav-buttons">
+      <!-- 风电场站选择下拉面板 -->
+      <div class="dropdown-panel-container">
+        <button id="windFarmBtn"><i class="fas fa-map-marker-alt"></i> 风电场站选择
+          <span class="current-selection">(当前: 请选择)</span>
+        </button>
+        <div class="dropdown-panel" id="windFarmPanel">
+          <div class="dropdown-item" data-farm="baidu">百度飞桨风电场</div>
+          <div class="dropdown-item" data-farm="south">南方某省风电场</div>
+        </div>
+      </div>
+      
+      <!-- 日期选择器 -->
+      <div class="date-picker-container">
+        <button id="dateBtn"><i class="fas fa-calendar-alt"></i> 预测时段选择
+          <span class="current-date">(当前: 2021-11-01)</span>
+        </button>
+        <div class="date-picker" id="datePicker">
+          <input type="date" id="dateInput" value="2021-11-01">
+        </div>
+      </div>
+      
+      <button id="modelBtn"><i class="fas fa-cogs"></i> 预测模型选择</button>
+      <button id="historyBtn"><i class="fas fa-history"></i> 历史实测</button>
+      <button id="weatherBtn"><i class="fas fa-cloud-sun-rain"></i> 气象预报</button>
+      <button id="generateBtn" class="active"><i class="fas fa-play"></i> 开始生成</button>
+      <button id="exportBtn"><i class="fas fa-download"></i> 场景导出</button>
+    </div>
+  </div>
+
+  <!-- 主体布局：左侧 + 中间 + 右侧 -->
+  <div class="container-fluid p-0">
+    <div class="row g-0">
+      <!-- 左侧区域 -->
+      <div class="col-lg-3 col-md-12 left-panel">
+        <!-- 风电场状态监测 -->
+        <div class="card">
+          <div class="card-header">风电场状态监测 <span class="current-date" style="font-size: 12px; font-weight: normal;">(2021-11-01)</span></div>
+          <div class="card-body">
+            <!-- 升级后的扇形图 -->
+            <div class="pie-chart-container">
+              <div class="pie-chart" id="powerPieChart" style="--power-percentage: 45%"></div>
+              <div class="chart-center-text">
+                <div class="current-power">90 MW</div>
+                <div class="total-capacity">/ 200 MW</div>
+                <div class="capacity-ratio">45%</div>
+              </div>
+            </div>
+            <p class="status-item">当前风电功率：90,000 kW</p>
+            <p class="status-item normal">正常运行风机数：52 台</p>
+            <p class="status-item abnormal">异常运行风机数：0 台</p>
+          </div>
+        </div>
+
+        <!-- 预测结果展示 -->
+        <div class="card">
+          <div class="card-header">预测结果展示</div>
+          <div class="card-body">
+            <div class="prediction-options">
+              <div class="prediction-option" id="option1">风电功率预测结果</div>
+              <div class="prediction-option" id="option2">爬坡事件预测总览</div>
+              <div class="prediction-option" id="option3">爬坡事件特征概率</div>
+            </div>
+            
+            <p style="margin-top: 15px; font-size: 13px; color: #666;">
+              
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 中间结果展示区 -->
+      <div class="col-lg-6 col-md-12 middle-panel">
+        <div class="middle-content">
+          <h3 class="chart-title" id="mainChartTitle">风电功率预测曲线</h3>
+          <!-- 图表容器 -->
+          <div class="chart-container" id="mainChartContainer">
+            <!-- 三个控制按钮 -->
+            <div class="chart-controls" id="featureChartControls" style="display: none;">
+              <button class="chart-control-btn" id="startTimeBtn">
+                <i class="fas fa-clock"></i> 开始时间
+              </button>
+              <button class="chart-control-btn" id="durationBtn">
+                <i class="fas fa-hourglass-half"></i> 爬坡时间
+              </button>
+              <button class="chart-control-btn" id="rampRateBtn">
+                <i class="fas fa-tachometer-alt"></i> 爬坡率
+              </button>
+            </div>
+            
+            <div class="chart-image-container">
+              <div class="chart-placeholder" id="mainChartContent">
+                <p>请选择日期后点击"开始生成"按钮</p>
+              </div>
+            </div>
+            
+            <!-- 爬坡事件表格容器，默认隐藏 -->
+            <div id="rampTableContainer" class="ramp-table-container" style="display: none;">
+              <div class="table-caption">爬坡事件详细数据</div>
+              <div id="tableContent"></div>
+            </div>
+            
+            <!-- 特征概率表格：开始时间表格 -->
+            <div id="startTimeTable" class="feature-table-container">
+              <div class="table-caption">爬坡事件开始时间概率数据</div>
+              <table class="feature-table">
+                <thead>
+                  <tr>
+                    <th>爬坡事件</th>
+                    <th>上界</th>
+                    <th>下界</th>
+                    <th>概率最大值</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td>19:15:00</td>
+                    <td>18:00:00</td>
+                    <td>18:45:00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- 特征概率表格：持续时间表格 -->
+            <div id="durationTable" class="feature-table-container">
+              <div class="table-caption">爬坡事件持续时间概率数据</div>
+              <table class="feature-table">
+                <thead>
+                  <tr>
+                    <th>爬坡事件</th>
+                    <th>上界 (min)</th>
+                    <th>下界 (min)</th>
+                    <th>概率最大值 (min)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td>135</td>
+                    <td>15</td>
+                    <td>60</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- 特征概率表格：爬坡率表格 -->
+            <div id="rampRateTable" class="feature-table-container">
+              <div class="table-caption">爬坡事件爬坡率概率数据</div>
+              <table class="feature-table">
+                <thead>
+                  <tr>
+                    <th>爬坡事件</th>
+                    <th>上界</th>
+                    <th>下界</th>
+                    <th>概率最大值</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td>-1.1</td>
+                    <td>-1.3</td>
+                    <td>-1.21</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧区域 -->
+      <div class="col-lg-3 col-md-12 right-panel">
+        <div class="card mb-3">
+          <div class="card-header">AI结果分析</div>
+          <div class="card-body analysis-content" id="aiAnalysis">
+            <!-- 初始为空，生成完成后显示内容 -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">任务日志</div>
+          <div class="card-body">
+            <ul class="task-log" id="taskLog">
+              <!-- 初始为空 -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局变量
+    let isGenerating = false;
+    let currentDate = "2021-11-01";
+    let currentFarm = "";
+    let currentFeatureView = "startTime"; // 默认显示开始时间视图
+    let currentChartType = "power"; // 跟踪当前图表类型
+    // 定义有爬坡事件数据的日期
+    const validDates = ["20211118", "20211226"];
+    // 总容量固定为200MW
+    const totalCapacityMW = 200;
+    
+    // 风电场数据
+    const farmData = {
+      baidu: {
+        name: "百度飞桨风电场",
+        capacity: "200MW",
+        totalTurbines: 52,
+        location: "待定区域"
+      },
+      south: {
+        name: "南方某省风电场",
+        capacity: "150MW",
+        totalTurbines: 38,
+        location: "南方某省"
+      }
+    };
+    
+    // 添加日志到任务日志
+    function addToTaskLog(message) {
+      const taskLog = document.getElementById('taskLog');
+      
+      const logItem = document.createElement('li');
+      logItem.textContent = `${message}`;
+      
+      // 添加到日志底部
+      taskLog.appendChild(logItem);
+      
+      // 高亮显示新日志
+      logItem.classList.add('active');
+      setTimeout(() => {
+        logItem.classList.remove('active');
+      }, 2000);
+      
+      // 自动滚动到底部
+      taskLog.scrollTop = taskLog.scrollHeight;
+    }
+    
+    // 从本地读取图片并显示
+    function loadAndDisplayImage(date, type = 'power', feature = null) {
+      // 更新当前图表类型
+      currentChartType = type;
+      if (type === 'feature') {
+        currentFeatureView = feature;
+      }
+      
+      const imageContainer = document.querySelector('.chart-image-container');
+      
+      // 显示加载状态
+      imageContainer.innerHTML = '<div class="image-loading"><i class="fas fa-spinner fa-spin"></i> 正在准备图表...</div>';
+      
+      // 格式化日期为YYYYMMDD格式
+      const formattedDate = date.replace(/-/g, '');
+      // 根据类型选择不同的图片路径
+      let imagePath;
+      
+      if (type === 'ramp') {
+        imagePath = `rampEvent/${formattedDate}.png`;
+      } else if (type === 'feature') {
+        // 检查当前日期是否在有效日期列表中
+        if (!validDates.includes(formattedDate)) {
+          // 非有效日期显示无爬坡事件
+          imageContainer.innerHTML = `
+            <div class="chart-placeholder">
+              <p><i class="fas fa-info-circle"></i> ${date} 无爬坡事件记录</p>
+              <p>系统监测到该日期内未发生风电爬坡事件</p>
+            </div>
+          `;
+          // 隐藏所有特征表格
+          hideAllFeatureTables();
+          return;
+        }
+        
+        // 有效日期加载对应的特征图表
+        const featureSuffixMap = {
+          startTime: "start_ramp_time",
+          duration: "ramp_duration",
+          rampRate: "ramp_rate"
+        };
+        const featureSuffix = featureSuffixMap[feature] || "start_ramp_time";
+        imagePath = `figures/${formattedDate}${featureSuffix}.png`;
+      } else if (type === 'meteorological') {
+        // 气象观测图片路径
+        imagePath = `meteorologicalWatch/${formattedDate}.png`;
+      } else {
+        imagePath = `windPowerForecast/${formattedDate}.png`;
+      }
+      
+      // 创建图片元素
+      const img = new Image();
+      img.src = imagePath;
+      img.className = 'chart-image';
+      
+      // 设置图片alt属性
+      if (type === 'ramp') {
+        img.alt = `爬坡事件预测总览（${date}）`;
+      } else if (type === 'feature') {
+        const featureNames = {
+          startTime: "开始时间分布",
+          duration: "爬坡时间分布",
+          rampRate: "爬坡率分布"
+        };
+        img.alt = `爬坡事件${featureNames[feature || 'startTime']}（${date}）`;
+      } else if (type === 'meteorological') {
+        img.alt = `气象观测数据（${date}）`;
+      } else {
+        img.alt = `风电功率预测结果（${date}）`;
+      }
+      
+      // 图片加载成功处理
+      img.onload = function() {
+        imageContainer.innerHTML = '';
+        imageContainer.appendChild(img);
+        
+        // 如果是爬坡事件图表，加载表格数据
+        if (type === 'ramp') {
+          loadRampEventData(date);
+          // 隐藏特征表格
+          hideAllFeatureTables();
+        } else if (type === 'feature' && feature) {
+          // 显示对应的特征表格
+          showFeatureTable(feature, formattedDate);
+          // 隐藏爬坡事件表格
+          document.getElementById('rampTableContainer').style.display = 'none';
+        } else {
+          // 隐藏所有表格
+          document.getElementById('rampTableContainer').style.display = 'none';
+          hideAllFeatureTables();
+        }
+      };
+      
+      // 图片加载失败处理
+      img.onerror = function() {
+        let errorMessage = `
+          <div class="image-error">
+            <i class="fas fa-exclamation-triangle"></i> 无法加载图片<br>
+            请确认文件存在: ${imagePath}
+          </div>
+        `;
+        
+        // 对于特征图表，提供更具体的提示
+        if (type === 'feature') {
+          errorMessage = `
+            <div class="image-error">
+              <i class="fas fa-exclamation-triangle"></i> 无法加载特征图表<br>
+              请确认文件存在: ${imagePath}
+            </div>
+          `;
+        } else if (type === 'meteorological') {
+          errorMessage = `
+            <div class="image-error">
+              <i class="fas fa-exclamation-triangle"></i> 无法加载气象观测图片<br>
+              请确认文件存在: ${imagePath}
+            </div>
+          `;
+        }
+        
+        imageContainer.innerHTML = errorMessage;
+        
+        // 如果是爬坡事件图表，仍然尝试加载表格数据
+        if (type === 'ramp') {
+          loadRampEventData(date);
+          hideAllFeatureTables();
+        } else if (type === 'feature' && feature) {
+          // 显示对应的特征表格
+          showFeatureTable(feature, formattedDate);
+          document.getElementById('rampTableContainer').style.display = 'none';
+        } else {
+          // 隐藏所有表格
+          document.getElementById('rampTableContainer').style.display = 'none';
+          hideAllFeatureTables();
+        }
+      };
+    }
+    
+    // 隐藏所有特征表格
+    function hideAllFeatureTables() {
+      document.getElementById('startTimeTable').style.display = 'none';
+      document.getElementById('durationTable').style.display = 'none';
+      document.getElementById('rampRateTable').style.display = 'none';
+    }
+    
+    // 显示指定的特征表格，根据日期选择不同数据
+    function showFeatureTable(feature, date) {
+      hideAllFeatureTables();
+      
+      // 获取对应表格的tbody元素
+      let tbody;
+      
+      if (feature === 'startTime') {
+        tbody = document.querySelector('#startTimeTable tbody');
+        document.getElementById('startTimeTable').style.display = 'block';
+        
+        // 根据日期设置不同数据
+        if (date === '20211118') {
+          tbody.innerHTML = `
+            <tr>
+              <td>1</td>
+              <td>19:15:00</td>
+              <td>18:00:00</td>
+              <td>18:45:00</td>
+            </tr>
+          `;
+        } else if (date === '20211226') {
+          tbody.innerHTML = `
+            <tr>
+              <td>1</td>
+              <td>4:15:00</td>
+              <td>2:30:00</td>
+              <td>3:30:00</td>
+            </tr>
+          `;
+        }
+      } else if (feature === 'duration') {
+        tbody = document.querySelector('#durationTable tbody');
+        document.getElementById('durationTable').style.display = 'block';
+        
+        // 根据日期设置不同数据
+        if (date === '20211118') {
+          tbody.innerHTML = `
+            <tr>
+              <td>1</td>
+              <td>135</td>
+              <td>15</td>
+              <td>60</td>
+            </tr>
+          `;
+        } else if (date === '20211226') {
+          tbody.innerHTML = `
+            <tr>
+              <td>1</td>
+              <td>165</td>
+              <td>15</td>
+              <td>75</td>
+            </tr>
+          `;
+        }
+      } else if (feature === 'rampRate') {
+        tbody = document.querySelector('#rampRateTable tbody');
+        document.getElementById('rampRateTable').style.display = 'block';
+        
+        // 根据日期设置不同数据
+        if (date === '20211118') {
+          tbody.innerHTML = `
+            <tr>
+              <td>1</td>
+              <td>-1.1</td>
+              <td>-1.3</td>
+              <td>-1.21</td>
+            </tr>
+          `;
+        } else if (date === '20211226') {
+          tbody.innerHTML = `
+            <tr>
+              <td>1</td>
+              <td>0.38</td>
+              <td>0.09</td>
+              <td>0.23</td>
+            </tr>
+          `;
+        }
+      }
+    }
+    
+    // 从CSV文件加载爬坡事件数据并显示表格
+    function loadRampEventData(date) {
+      const tableContainer = document.getElementById('rampTableContainer');
+      const tableContent = document.getElementById('tableContent');
+      
+      // 显示表格容器
+      tableContainer.style.display = 'block';
+      
+      // 显示加载状态
+      tableContent.innerHTML = '<div class="table-loading"><i class="fas fa-spinner fa-spin"></i> 正在加载爬坡事件数据...</div>';
+      
+      // 格式化日期为YYYYMMDD格式
+      const formattedDate = date.replace(/-/g, '');
+      const csvPath = `rampEvent/${formattedDate}.csv`;
+      
+      // 尝试多种编码格式读取CSV文件
+      const encodings = ['utf-8', 'gbk', 'gb2312', 'utf-16'];
+      let currentEncodingIndex = 0;
+      
+      function tryReadWithEncoding(encoding) {
+        fetch(csvPath)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('文件未找到或无法加载');
+            }
+            return response.arrayBuffer();
+          })
+          .then(buffer => {
+            // 使用TextDecoder解码
+            const decoder = new TextDecoder(encoding, {fatal: true});
+            const csvText = decoder.decode(buffer);
+            
+            // 解析CSV并生成表格
+            const tableHTML = parseRampCSV(csvText);
+            tableContent.innerHTML = tableHTML;
+            addToTaskLog(`已加载爬坡事件数据`);
+          })
+          .catch(error => {
+            console.log(`使用编码 ${encoding} 读取失败:`, error);
+            currentEncodingIndex++;
+            
+            // 如果还有其他编码格式可以尝试
+            if (currentEncodingIndex < encodings.length) {
+              tryReadWithEncoding(encodings[currentEncodingIndex]);
+            } else {
+              // 所有编码都尝试失败
+              tableContent.innerHTML = `
+                <div class="table-error">
+                  <i class="fas fa-exclamation-triangle"></i> 无法加载爬坡事件数据<br>
+                  请确认文件存在: ${csvPath}
+                </div>
+              `;
+            }
+          });
+      }
+      
+      // 开始尝试读取
+      tryReadWithEncoding(encodings[currentEncodingIndex]);
+    }
+    
+    // 解析爬坡事件CSV数据并生成表格HTML
+    function parseRampCSV(csvText) {
+      // 按行拆分CSV
+      const lines = csvText.split('\n')
+        .map(line => line.trim())
+        .filter(line => line !== '');
+      
+      // 如果没有数据行，返回提示信息
+      if (lines.length === 0) {
+        return '<div class="table-error">没有找到爬坡事件数据</div>';
+      }
+      
+      // 解析表头行，查找所需列的索引
+      const headerLine = lines[0];
+      const headers = headerLine.split(',')
+        .map(header => header.trim().toLowerCase());
+      
+      // 查找对应列的索引
+      const noIndex = headers.indexOf('no.');
+      const startTimeIndex = headers.indexOf('starttime');
+      const durationIndex = headers.indexOf('duration');
+      const rampRateIndex = headers.indexOf('ramprate');
+      
+      // 检查是否找到所有必要的列
+      if (noIndex === -1 || startTimeIndex === -1 || 
+          durationIndex === -1 || rampRateIndex === -1) {
+        return `
+          <div class="table-error">
+            CSV文件格式不正确，缺少必要的列<br>
+            需要包含: No.、startTime、duration、rampRate
+          </div>
+        `;
+      }
+      
+      // 处理数据行
+      let tableRows = '';
+      let hasData = false;
+      
+      // 从第二行开始处理数据
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+        
+        const columns = line.split(',');
+        
+        // 获取各列数据，空值显示"无"
+        // 爬坡事件列数据保留整数
+        let no = columns[noIndex]?.trim() || '无';
+        if (no !== '无') {
+          // 尝试转换为整数
+          const intNo = parseInt(no, 10);
+          no = isNaN(intNo) ? no : intNo.toString();
+        }
+        
+        const startTime = columns[startTimeIndex]?.trim() || '无';
+        const duration = columns[durationIndex]?.trim() || '无';
+        const rampRate = columns[rampRateIndex]?.trim() || '无';
+        
+        // 添加行到表格
+        tableRows += `
+          <tr>
+            <td>${no}</td>
+            <td>${startTime}</td>
+            <td>${duration}</td>
+            <td>${rampRate}</td>
+          </tr>
+        `;
+        
+        hasData = true;
+      }
+      
+      // 如果没有数据行
+      if (!hasData) {
+        return `
+          <table class="ramp-table">
+            <thead>
+              <tr>
+                <th>爬坡事件</th>
+                <th>开始时间</th>
+                <th>持续时间 (min)</th>
+                <th>爬坡率</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="4" class="table-error">没有找到爬坡事件数据</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+      }
+      
+      // 生成完整的表格HTML，持续时间列名添加单位min
+      return `
+        <table class="ramp-table">
+          <thead>
+            <tr>
+              <th>爬坡事件</th>
+              <th>开始时间</th>
+              <th>持续时间 (min)</th>
+              <th>爬坡率</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      `;
+    }
+    
+    // 从本地CSV文件读取AI结果分析（支持多种编码格式）
+    function loadAIAnalysisFromCSV(date) {
+      const analysisContainer = document.getElementById('aiAnalysis');
+      const formattedDate = date.replace(/-/g, '');
+      const csvPath = `AIResult/${formattedDate}.csv`;
+      
+      // 显示加载状态
+      analysisContainer.innerHTML = '<div><i class="fas fa-spinner fa-spin"></i> 正在加载AI分析结果...</div>';
+      
+      // 尝试多种编码格式读取CSV文件，解决中文乱码问题
+      const encodings = ['utf-8', 'gbk', 'gb2312', 'utf-16'];
+      let currentEncodingIndex = 0;
+      
+      function tryReadWithEncoding(encoding) {
+        // 使用第三方库进行编码转换
+        fetch(csvPath)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('文件未找到或无法加载');
+            }
+            return response.arrayBuffer();
+          })
+          .then(buffer => {
+            // 使用TextDecoder解码，支持多种编码
+            const decoder = new TextDecoder(encoding, {fatal: true});
+            const csvText = decoder.decode(buffer);
+            
+            // 解析CSV并显示第一个格子的结果
+            const analysisHTML = parseCSVToAnalysis(csvText);
+            analysisContainer.innerHTML = analysisHTML;
+            addToTaskLog(`已加载AI分析结果`);
+          })
+          .catch(error => {
+            console.log(`使用编码 ${encoding} 读取失败:`, error);
+            currentEncodingIndex++;
+            
+            // 如果还有其他编码格式可以尝试
+            if (currentEncodingIndex < encodings.length) {
+              tryReadWithEncoding(encodings[currentEncodingIndex]);
+            } else {
+              // 所有编码都尝试失败
+              analysisContainer.innerHTML = `
+                <div style="color: #e53e3e;">
+                  <i class="fas fa-exclamation-triangle"></i> 无法加载AI分析结果<br>
+                  尝试了所有编码格式均失败，请检查文件编码
+                </div>
+              `;
+            }
+          });
+      }
+      
+      // 开始尝试读取
+      tryReadWithEncoding(encodings[currentEncodingIndex]);
+    }
+    
+    // 解析CSV内容，只提取第一个格子的内容
+    function parseCSVToAnalysis(csvText) {
+      // 按行拆分CSV
+      const lines = csvText.split('\n').filter(line => line.trim() !== '');
+      
+      // 如果没有数据行，返回提示信息
+      if (lines.length === 0) {
+        return '<p>没有可用的AI分析数据</p>';
+      }
+      
+      // 获取第一行数据
+      const firstLine = lines[0];
+      
+      // 按逗号拆分获取第一个单元格内容
+      const firstCell = firstLine.split(',')[0].trim();
+      
+      // 如果第一个单元格为空，返回提示信息
+      if (!firstCell) {
+        return '<p>AI分析数据为空</p>';
+      }
+      
+      // 格式化显示第一个格子的内容
+      return `<p>${firstCell}</p>`;
+    }
+    
+    // 初始化风电场选择面板
+    const windFarmBtn = document.getElementById('windFarmBtn');
+    const windFarmPanel = document.getElementById('windFarmPanel');
+    const currentSelection = document.querySelector('.current-selection');
+    
+    windFarmBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      windFarmPanel.classList.toggle('show');
+      applyButtonClickEffect(this);
+    });
+    
+    // 风电场选择
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const farmId = this.getAttribute('data-farm');
+        currentFarm = farmId;
+        
+        // 更新选中状态
+        document.querySelectorAll('.dropdown-item').forEach(i => {
+          i.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // 更新显示的风电场名称
+        currentSelection.textContent = `(当前: ${farmData[farmId].name})`;
+        
+        // 更新风电场状态数据
+        updateFarmStatus(farmId);
+        
+        // 隐藏选择面板
+        windFarmPanel.classList.remove('show');
+      });
+    });
+    
+    // 点击页面其他地方关闭面板
+    document.addEventListener('click', function() {
+      windFarmPanel.classList.remove('show');
+      datePicker.classList.remove('show');
+    });
+    
+    // 初始化日期选择器
+    const dateBtn = document.getElementById('dateBtn');
+    const datePicker = document.getElementById('datePicker');
+    const dateInput = document.getElementById('dateInput');
+    const currentDateElements = document.querySelectorAll('.current-date');
+    
+    dateBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      datePicker.classList.toggle('show');
+      applyButtonClickEffect(this);
+    });
+    
+    // 日期选择变更时自动更新（移除了确认按钮）
+    dateInput.addEventListener('change', function() {
+      currentDate = this.value;
+      // 更新显示的日期
+      currentDateElements.forEach(el => {
+        if (el.textContent.includes('当前:')) {
+          el.textContent = `(当前: ${currentDate})`;
+        } else {
+          el.textContent = `(${currentDate})`;
+        }
+      });
+      
+      // 隐藏日期选择器
+      datePicker.classList.remove('show');
+      
+      // 更新图表标题
+      document.getElementById('mainChartTitle').textContent = 
+        `风电功率预测曲线 - ${currentDate}`;
+      
+      // 显示将要读取的文件路径
+      const formattedDate = currentDate.replace(/-/g, '');
+      addToTaskLog(`已选择日期: ${currentDate}`);
+    });
+    
+    // 按钮点击效果
+    const allButtons = document.querySelectorAll('.nav-buttons button');
+    allButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // 移除所有按钮的active类，除了"开始生成"按钮在生成过程中保持active
+        if (!isGenerating || this.id !== 'generateBtn') {
+          allButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+        }
+        
+        // 历史实测按钮处理
+        if (this.id === 'historyBtn') {
+          showMeteorologicalData(currentDate, '历史实测数据');
+        }
+        
+        // 气象预报按钮处理
+        if (this.id === 'weatherBtn') {
+          showMeteorologicalData(currentDate, '气象预报数据');
+        }
+      });
+    });
+    
+    // 应用按钮点击效果
+    function applyButtonClickEffect(button) {
+      button.classList.add('clicked');
+      setTimeout(() => {
+        button.classList.remove('clicked');
+      }, 200);
+    }
+    
+    // 更新风电场状态数据 - 修改为固定风机数量
+    function updateFarmStatus(farmId) {
+      const farm = farmData[farmId];
+      
+      // 生成随机的当前状态数据，但保持风机数量固定
+      const randomPowerFactor = Math.random() * 0.3 + 0.5; // 50%-80%的容量利用率
+      // 固定风机数量：正常52台，异常0台
+      const normalCount = 52;
+      const abnormalCount = 0;
+      
+      // 计算当前功率（MW）
+      const currentPowerMW = Math.round(totalCapacityMW * randomPowerFactor);
+      // 转换为kW显示
+      const currentPowerKW = currentPowerMW * 1000;
+      // 计算百分比
+      const powerPercentage = Math.round(randomPowerFactor * 100);
+      
+      // 更新扇形图
+      const pieChart = document.getElementById('powerPieChart');
+      pieChart.style.setProperty('--power-percentage', `${powerPercentage}%`);
+      
+      // 更新中心文本
+      document.querySelector('.current-power').textContent = `${currentPowerMW} MW`;
+      document.querySelector('.total-capacity').textContent = `/ ${totalCapacityMW} MW`;
+      document.querySelector('.capacity-ratio').textContent = `${powerPercentage}%`;
+      
+      // 更新状态项
+      const statusItems = document.querySelectorAll('.status-item');
+      statusItems[0].textContent = `当前风电功率：${currentPowerKW.toLocaleString()} kW`;
+      statusItems[1].textContent = `正常运行风机数：${normalCount} 台`;
+      statusItems[2].textContent = `异常运行风机数：${abnormalCount} 台`;
+    }
+    
+    // 预测选项切换功能
+    document.querySelectorAll('.prediction-option').forEach(option => {
+      option.addEventListener('click', function() {
+        // 移除所有选项的active类
+        document.querySelectorAll('.prediction-option').forEach(opt => {
+          opt.classList.remove('active');
+        });
+        
+        // 给当前点击的选项添加active类
+        this.classList.add('active');
+        
+        // 更新中间区域的图表标题和内容
+        const chartTitle = document.getElementById('mainChartTitle');
+        const imageContainer = document.querySelector('.chart-image-container');
+        const tableContainer = document.getElementById('rampTableContainer');
+        const featureControls = document.getElementById('featureChartControls');
+        
+        if (this.id === 'option1') {
+          // 风电功率预测结果
+          chartTitle.textContent = `风电功率预测曲线 - ${currentDate}`;
+          // 隐藏表格和特征控制按钮
+          tableContainer.style.display = 'none';
+          featureControls.style.display = 'none';
+          hideAllFeatureTables();
+          // 更新当前图表类型
+          currentChartType = "power";
+          // 如果已经生成过数据，重新加载图片
+          if (!isGenerating && currentFarm) {
+            const formattedDate = currentDate.replace(/-/g, '');
+            addToTaskLog(`加载风电功率预测图`);
+            loadAndDisplayImage(currentDate, 'power');
+          } else {
+            imageContainer.innerHTML = `
+              <div class="chart-placeholder">
+                <p>请选择日期后点击"开始生成"按钮</p>
+              </div>
+            `;
+          }
+        } else if (this.id === 'option2') {
+          // 爬坡事件预测总览
+          chartTitle.textContent = `爬坡事件预测总览 - ${currentDate}`;
+          // 隐藏特征控制按钮和特征表格
+          featureControls.style.display = 'none';
+          hideAllFeatureTables();
+          // 更新当前图表类型
+          currentChartType = "ramp";
+          // 如果已经生成过数据，加载爬坡事件图表和表格
+          if (!isGenerating && currentFarm) {
+            const formattedDate = currentDate.replace(/-/g, '');
+            addToTaskLog(`加载爬坡事件预测图`);
+            loadAndDisplayImage(currentDate, 'ramp');
+          } else {
+            imageContainer.innerHTML = `
+              <div class="chart-placeholder">
+                <p>此处显示爬坡事件预测总览图</p>
+              </div>
+            `;
+            // 隐藏表格
+            tableContainer.style.display = 'none';
+          }
+        } else if (this.id === 'option3') {
+          // 爬坡事件特征概率
+          chartTitle.textContent = `爬坡事件特征概率 - ${currentDate}`;
+          // 隐藏表格，显示特征控制按钮
+          tableContainer.style.display = 'none';
+          featureControls.style.display = 'flex';
+          
+          // 重置按钮状态
+          document.querySelectorAll('.chart-control-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          document.getElementById('startTimeBtn').classList.add('active');
+          
+          // 更新当前图表类型
+          currentChartType = "feature";
+          currentFeatureView = "startTime";
+          
+          // 检查当前日期是否有数据
+          const formattedDate = currentDate.replace(/-/g, '');
+          if (!validDates.includes(formattedDate)) {
+            // 非有效日期显示提示
+            imageContainer.innerHTML = `
+              <div class="chart-placeholder">
+                <p><i class="fas fa-info-circle"></i> ${currentDate} 无爬坡事件记录</p>
+                <p>系统监测到该日期内未发生风电爬坡事件</p>
+              </div>
+            `;
+            addToTaskLog(`${currentDate} 无爬坡事件数据记录`);
+            hideAllFeatureTables();
+          } else if (!isGenerating && currentFarm) {
+            // 有效日期且已生成数据，加载默认的特征图表（开始时间）
+            addToTaskLog(`加载爬坡事件特征图`);
+            loadAndDisplayImage(currentDate, 'feature', currentFeatureView);
+          } else {
+            imageContainer.innerHTML = `
+              <div class="chart-placeholder">
+                <p>此处显示爬坡事件特征概率图表</p>
+                <p>包含：爬坡速率分布、持续时间分布、幅度分布</p>
+                <p>最可能的爬坡类型：中等强度，持续约2小时</p>
+              </div>
+            `;
+            hideAllFeatureTables();
+          }
+        }
+      });
+    });
+    
+    // 爬坡事件特征按钮点击事件
+    document.getElementById('startTimeBtn').addEventListener('click', function() {
+      const formattedDate = currentDate.replace(/-/g, '');
+      switchFeatureView('startTime', this, formattedDate);
+    });
+    
+    document.getElementById('durationBtn').addEventListener('click', function() {
+      const formattedDate = currentDate.replace(/-/g, '');
+      switchFeatureView('duration', this, formattedDate);
+    });
+    
+    document.getElementById('rampRateBtn').addEventListener('click', function() {
+      const formattedDate = currentDate.replace(/-/g, '');
+      switchFeatureView('rampRate', this, formattedDate);
+    });
+    
+    // 切换爬坡事件特征视图
+    function switchFeatureView(feature, button, formattedDate) {
+      if (!currentFarm || isGenerating) return;
+      
+      // 更新按钮状态
+      document.querySelectorAll('.chart-control-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      button.classList.add('active');
+      
+      // 检查当前日期是否有数据
+      if (!validDates.includes(formattedDate)) {
+        // 非有效日期显示提示
+        document.querySelector('.chart-image-container').innerHTML = `
+          <div class="chart-placeholder">
+            <p><i class="fas fa-info-circle"></i> ${currentDate} 无爬坡事件记录</p>
+            <p>系统监测到该日期内未发生风电爬坡事件</p>
+          </div>
+        `;
+        addToTaskLog(`${currentDate} 无爬坡事件数据记录`);
+        hideAllFeatureTables();
+        return;
+      }
+      
+      // 更新当前视图
+      currentFeatureView = feature;
+      
+      // 加载对应的特征图表
+      const featureSuffixMap = {
+        startTime: "start_ramp_time",
+        duration: "ramp_duration",
+        rampRate: "ramp_rate"
+      };
+      const featureSuffix = featureSuffixMap[feature] || "start_ramp_time";
+      
+      
+      loadAndDisplayImage(currentDate, 'feature', feature);
+    }
+    
+    // 获取特征名称
+    function getFeatureName(feature) {
+      const names = {
+        startTime: "开始时间",
+        duration: "爬坡时间",
+        rampRate: "爬坡率"
+      };
+      return names[feature] || feature;
+    }
+    
+    // 开始生成按钮功能
+    const generateBtn = document.getElementById('generateBtn');
+    generateBtn.addEventListener('click', function() {
+      if (!isGenerating && currentFarm) { // 确保已选择风电场
+        startGenerating();
+      } else if (!currentFarm) {
+        alert('请先选择风电场');
+      }
+      applyButtonClickEffect(this);
+    });
+    
+    // 开始生成过程
+    function startGenerating() {
+      isGenerating = true;
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 处理中...';
+      
+      // 清空任务日志
+      const taskLog = document.getElementById('taskLog');
+      taskLog.innerHTML = '';
+      
+      // 定义要显示的任务日志
+      const tasks = [
+        "1. 开始读取数据",
+        "2. 读取数据完成",
+        "3. 开始预测风电功率",
+        "4. 风电功率预测完成",
+        "5. 开始爬坡检测",
+        "6. 爬坡检测完成",
+        "7. 开始统计爬坡特征",
+        "8. 爬坡特征统计完成",
+        "9. 结果输出"
+      ];
+      
+      // 依次显示每条日志，每条间隔600ms
+      tasks.forEach((task, index) => {
+        setTimeout(() => {
+          addToTaskLog(task);
+          
+          // 所有日志显示完成后加载图片和AI分析结果
+          if (index === tasks.length - 1) {
+            setTimeout(() => {
+              // 加载当前选中的图表类型
+              const activeOption = document.querySelector('.prediction-option.active');
+              if (activeOption && activeOption.id === 'option2') {
+                loadAndDisplayImage(currentDate, 'ramp');
+              } else if (activeOption && activeOption.id === 'option3') {
+                // 如果当前是特征视图，加载对应的图表
+                loadAndDisplayImage(currentDate, 'feature', currentFeatureView);
+              } else {
+                // 默认选择第一个选项并加载其图表
+                document.getElementById('option1').click();
+              }
+              loadAIAnalysisFromCSV(currentDate); // 加载AI分析结果
+              
+              // 重置按钮状态
+              isGenerating = false;
+              generateBtn.disabled = false;
+              generateBtn.innerHTML = '<i class="fas fa-play"></i> 开始生成';
+              
+              // 生成完成后启用导出按钮
+              document.getElementById('exportBtn').disabled = false;
+              addToTaskLog("预测完成，可点击'场景导出'下载当前图表");
+            }, 800);
+          }
+        }, 600 * (index + 1));
+      });
+    }
+    
+    // 显示气象观测数据
+    function showMeteorologicalData(date, typeName) {
+      const chartTitle = document.getElementById('mainChartTitle');
+      const imageContainer = document.querySelector('.chart-image-container');
+      const tableContainer = document.getElementById('rampTableContainer');
+      const featureControls = document.getElementById('featureChartControls');
+      
+      // 隐藏表格和特征控制按钮
+      tableContainer.style.display = 'none';
+      featureControls.style.display = 'none';
+      hideAllFeatureTables();
+      
+      chartTitle.textContent = `${currentFarm ? farmData[currentFarm].name : ''} ${typeName}（${date}）`;
+      
+      // 更新当前图表类型
+      currentChartType = "meteorological";
+      
+      // 如果已经选择风电场，尝试加载气象图片
+      if (!isGenerating && currentFarm) {
+        const formattedDate = currentDate.replace(/-/g, '');
+       
+        loadAndDisplayImage(currentDate, 'meteorological');
+      } else {
+        const formattedDate = currentDate.replace(/-/g, '');
+        imageContainer.innerHTML = `
+          <div class="chart-placeholder">
+            <p>此处显示${typeName}图表</p>
+            <p>包含：风速、风向、温度、湿度等气象要素</p>
+            <p>数据时间范围：${date} 00:00 至 ${date} 23:59</p>
+          </div>
+        `;
+      }
+    }
+    
+    // 辅助函数：获取下一天日期
+    function getNextDate(dateString) {
+      const date = new Date(dateString);
+      date.setDate(date.getDate() + 1);
+      return date.toISOString().split('T')[0];
+    }
+    
+    // 场景导出功能实现
+    function setupExportFunctionality() {
+      const exportBtn = document.getElementById('exportBtn');
+      // 初始禁用导出按钮
+      exportBtn.disabled = true;
+      
+      exportBtn.addEventListener('click', function() {
+        // 检查是否已选择风电场
+        if (!currentFarm) {
+          alert('请先选择风电场');
+          return;
+        }
+        
+        // 检查是否正在生成
+        if (isGenerating) {
+          alert('预测正在进行中，请等待完成后再导出');
+          return;
+        }
+        
+        // 获取当前显示的图片
+        const chartImage = document.querySelector('.chart-image');
+        
+        // 检查图片是否存在
+        if (!chartImage || !chartImage.src) {
+          alert('没有可导出的图表，请先生成预测结果');
+          return;
+        }
+        
+        // 应用按钮点击效果
+        applyButtonClickEffect(this);
+        
+        // 根据当前图表类型生成文件名
+        const formattedDate = currentDate.replace(/-/g, '');
+        let fileName;
+        const farmName = currentFarm === 'baidu' ? '百度飞桨风电场' : '南方某省风电场';
+        
+        switch (currentChartType) {
+          case 'power':
+            fileName = `${farmName}_风电功率预测_${currentDate}.png`;
+            break;
+          case 'ramp':
+            fileName = `${farmName}_爬坡事件预测总览_${currentDate}.png`;
+            break;
+          case 'feature':
+            const featureNames = {
+              startTime: "开始时间分布",
+              duration: "爬坡时间分布",
+              rampRate: "爬坡率分布"
+            };
+            fileName = `${farmName}_爬坡事件${featureNames[currentFeatureView]}_${currentDate}.png`;
+            break;
+          case 'meteorological':
+            // 判断是历史实测还是气象预报
+            const historyBtn = document.getElementById('historyBtn');
+            const weatherBtn = document.getElementById('weatherBtn');
+            const isHistory = historyBtn.classList.contains('active');
+            
+            fileName = `${farmName}_${isHistory ? '历史实测' : '气象预报'}_${currentDate}.png`;
+            break;
+          default:
+            fileName = `${farmName}_预测结果_${currentDate}.png`;
+        }
+        
+        // 创建下载链接并触发下载
+        const downloadLink = document.createElement('a');
+        downloadLink.href = chartImage.src;
+        downloadLink.download = fileName;
+        
+        // 触发下载
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // 添加日志
+        addToTaskLog(`已导出图表: ${fileName}`);
+      });
+    }
+    
+    // 页面加载完成后初始化
+    window.addEventListener('load', function() {
+      console.log('系统初始化完成');
+      // 初始化扇形图显示
+      const initialPowerMW = 90; // 初始功率90MW
+      const initialPercentage = (initialPowerMW / totalCapacityMW) * 100;
+      const pieChart = document.getElementById('powerPieChart');
+      pieChart.style.setProperty('--power-percentage', `${initialPercentage}%`);
+      
+      // 初始化导出功能
+      setupExportFunctionality();
+    });
+  </script>
+
+
+    
+    
+    </body></html>
+    
